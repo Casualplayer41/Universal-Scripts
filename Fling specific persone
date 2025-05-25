@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- GUI
+-- GUI Creation
 local gui = Instance.new("ScreenGui", game.CoreGui)
 local frame = Instance.new("Frame", gui)
 local textbox = Instance.new("TextBox", frame)
@@ -18,34 +18,37 @@ textbox.Size = UDim2.new(1, -20, 0, 30)
 textbox.Position = UDim2.new(0, 10, 0, 10)
 textbox.PlaceholderText = "Enter Username"
 textbox.Text = ""
+textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+textbox.TextColor3 = Color3.fromRGB(0, 0, 0)
 
 button.Size = UDim2.new(1, -20, 0, 30)
 button.Position = UDim2.new(0, 10, 0, 50)
 button.Text = "Spin Fling"
 button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- Spin Fling Function
 local function spinFling(targetPlayer)
     local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
     local targetChar = targetPlayer.Character
-    local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
-
+    if not targetChar then return end
+    local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
     if not hrp or not targetHRP then return end
 
     local start = tick()
     while tick() - start < 10 do
-        -- Teleport near target
-        hrp.CFrame = targetHRP.CFrame + Vector3.new(2, 0, 0)
-        -- Spin
+        -- Teleport directly inside the target
+        hrp.CFrame = targetHRP.CFrame
+        -- Spin fast to fling
         hrp.RotVelocity = Vector3.new(0, 100, 0)
         task.wait(0.05)
     end
-
     hrp.RotVelocity = Vector3.zero
 end
 
--- Button Click
+-- Button Click Event
 button.MouseButton1Click:Connect(function()
     local name = textbox.Text
     local target = Players:FindFirstChild(name)
@@ -57,3 +60,4 @@ button.MouseButton1Click:Connect(function()
         button.Text = "Spin Fling"
     end
 end)
+
