@@ -1,1 +1,58 @@
+-- Create GUI
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+local TextBox = Instance.new("TextBox", Frame)
+local Button = Instance.new("TextButton", Frame)
 
+-- GUI Design
+ScreenGui.Name = "FlingGUI"
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+Frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+
+TextBox.Size = UDim2.new(1, -20, 0, 30)
+TextBox.Position = UDim2.new(0, 10, 0, 10)
+TextBox.PlaceholderText = "Enter username"
+TextBox.Text = ""
+
+Button.Size = UDim2.new(1, -20, 0, 30)
+Button.Position = UDim2.new(0, 10, 0, 50)
+Button.Text = "Fling"
+Button.BackgroundColor3 = Color3.new(1, 0, 0)
+
+-- Fling function
+local function flingPlayer(targetPlayer)
+    local lp = game.Players.LocalPlayer
+    local hrp = lp.Character:FindFirstChild("HumanoidRootPart")
+    local targetChar = targetPlayer.Character
+    if not targetChar then return end
+    local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+    if not hrp or not targetHRP then return end
+
+    -- Add BodyVelocity for fling
+    local bv = Instance.new("BodyVelocity", hrp)
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bv.Velocity = Vector3.new(0, 0, 0)
+
+    local startTime = tick()
+    while tick() - startTime < 10 do
+        hrp.CFrame = targetHRP.CFrame + Vector3.new(0, 5, 0)
+        bv.Velocity = Vector3.new(9999, 9999, 9999)
+        task.wait(0.1)
+    end
+
+    bv:Destroy()
+end
+
+-- Button click event
+Button.MouseButton1Click:Connect(function()
+    local name = TextBox.Text
+    local target = game.Players:FindFirstChild(name)
+    if target then
+        flingPlayer(target)
+    else
+        Button.Text = "Player not found!"
+        task.wait(2)
+        Button.Text = "Fling"
+    end
+end)
