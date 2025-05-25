@@ -1,13 +1,12 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- GUI Creation
 local gui = Instance.new("ScreenGui", game.CoreGui)
 local frame = Instance.new("Frame", gui)
 local textbox = Instance.new("TextBox", frame)
 local button = Instance.new("TextButton", frame)
 
-gui.Name = "SpinFlingGUI"
+gui.Name = "ComboFlingGUI"
 frame.Size = UDim2.new(0, 200, 0, 100)
 frame.Position = UDim2.new(0.5, -100, 0.5, -50)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -23,41 +22,45 @@ textbox.TextColor3 = Color3.fromRGB(0, 0, 0)
 
 button.Size = UDim2.new(1, -20, 0, 30)
 button.Position = UDim2.new(0, 10, 0, 50)
-button.Text = "Spin Fling"
+button.Text = "Combo Fling"
 button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Spin Fling Function
-local function spinFling(targetPlayer)
+local function comboFling(targetPlayer)
     local char = LocalPlayer.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
     local targetChar = targetPlayer.Character
-    if not targetChar then return end
-    local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+    local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+
     if not hrp or not targetHRP then return end
+
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Parent = hrp
 
     local start = tick()
     while tick() - start < 10 do
-        -- Teleport directly inside the target
-        hrp.CFrame = targetHRP.CFrame
-        -- Spin fast to fling
-        hrp.RotVelocity = Vector3.new(0, 100, 0)
-        task.wait(0.05)
+        hrp.CFrame = targetHRP.CFrame + Vector3.new(0, 0.5, 0)
+        hrp.RotVelocity = Vector3.new(0, 500, 0) -- very fast spin
+        bv.Velocity = Vector3.new(200, 200, 200) -- push hard
+        task.wait(0.03)
     end
+
     hrp.RotVelocity = Vector3.zero
+    bv:Destroy()
 end
 
--- Button Click Event
 button.MouseButton1Click:Connect(function()
     local name = textbox.Text
     local target = Players:FindFirstChild(name)
     if target then
-        spinFling(target)
+        button.Text = "Flinging..."
+        comboFling(target)
+        button.Text = "Combo Fling"
     else
         button.Text = "Player Not Found!"
         task.wait(2)
-        button.Text = "Spin Fling"
+        button.Text = "Combo Fling"
     end
 end)
 
