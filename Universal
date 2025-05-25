@@ -58,9 +58,9 @@ local Button = Tab:CreateButton({
 }) 
 
 local Button = Tab:CreateButton({
-	Name = "Cat Bypasser",
+	Name = "Cat Bypasser (key = nolie)",
 	Callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/edgeiy/infiniteyield/master/source"))();
+		loadstring(game:HttpGet("loadstring(game:HttpGet("https://raw.githubusercontent.com/shadow62x/catbypass/main/upfix"))()
 	end,
 })
 
