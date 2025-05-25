@@ -1,12 +1,13 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- GUI Setup
 local gui = Instance.new("ScreenGui", game.CoreGui)
 local frame = Instance.new("Frame", gui)
 local textbox = Instance.new("TextBox", frame)
 local button = Instance.new("TextButton", frame)
 
-gui.Name = "ComboFlingGUI"
+gui.Name = "HardFlingGUI"
 frame.Size = UDim2.new(0, 200, 0, 100)
 frame.Position = UDim2.new(0.5, -100, 0.5, -50)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -22,11 +23,12 @@ textbox.TextColor3 = Color3.fromRGB(0, 0, 0)
 
 button.Size = UDim2.new(1, -20, 0, 30)
 button.Position = UDim2.new(0, 10, 0, 50)
-button.Text = "Combo Fling"
+button.Text = "Hard Fling"
 button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local function comboFling(targetPlayer)
+-- Main fling logic
+local function hardFling(targetPlayer)
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     local targetChar = targetPlayer.Character
@@ -34,33 +36,50 @@ local function comboFling(targetPlayer)
 
     if not hrp or not targetHRP then return end
 
-    local bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    bv.Parent = hrp
-
-    local start = tick()
-    while tick() - start < 10 do
-        hrp.CFrame = targetHRP.CFrame + Vector3.new(0, 0.5, 0)
-        hrp.RotVelocity = Vector3.new(0, 500, 0) -- very fast spin
-        bv.Velocity = Vector3.new(200, 200, 200) -- push hard
-        task.wait(0.03)
+    -- Remove any existing BodyMovers
+    for _, obj in ipairs(hrp:GetChildren()) do
+        if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") then
+            obj:Destroy()
+        end
     end
 
-    hrp.RotVelocity = Vector3.zero
+    -- Add velocity components
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(9999, 9999, 9999)
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bv.P = 1e9
+    bv.Parent = hrp
+
+    local bav = Instance.new("BodyAngularVelocity")
+    bav.AngularVelocity = Vector3.new(0, 500, 0)
+    bav.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+    bav.P = 1e9
+    bav.Parent = hrp
+
+    -- Weld to target
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = hrp
+    weld.Part1 = targetHRP
+    weld.Parent = hrp
+
+    -- Wait and cleanup
+    task.wait(10)
     bv:Destroy()
+    bav:Destroy()
+    weld:Destroy()
 end
 
+-- Button event
 button.MouseButton1Click:Connect(function()
     local name = textbox.Text
     local target = Players:FindFirstChild(name)
     if target then
         button.Text = "Flinging..."
-        comboFling(target)
-        button.Text = "Combo Fling"
+        hardFling(target)
+        button.Text = "Hard Fling"
     else
         button.Text = "Player Not Found!"
         task.wait(2)
-        button.Text = "Combo Fling"
+        button.Text = "Hard Fling"
     end
 end)
-
