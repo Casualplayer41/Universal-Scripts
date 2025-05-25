@@ -5,7 +5,7 @@ local Window = Rayfield:CreateWindow({
 	Icon = "Sparkles", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "NotRat (I hope)",
 	LoadingSubtitle = "Made by TottalyNotARater",
-	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+	Theme = "Default",
  
 	DisableRayfieldPrompts = false,
 	DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
@@ -28,7 +28,7 @@ local Window = Rayfield:CreateWindow({
 	   Subtitle = "Key System",
 	   Note = "Join my discord server for key, or just type Dyno", -- Use this to tell the user how to get a key
 	   FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-	   SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+	   SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
 	   GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
 	   Key = {"Dyno"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
 	}
@@ -60,7 +60,7 @@ local Button = Tab:CreateButton({
 local Button = Tab:CreateButton({
 	Name = "Cat Bypasser (key = nolie)",
 	Callback = function()
-		loadstring(game:HttpGet("loadstring(game:HttpGet("https://raw.githubusercontent.com/shadow62x/catbypass/main/upfix"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/shadow62x/catbypass/main/upfix"))()
 	end,
 })
 
