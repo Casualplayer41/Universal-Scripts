@@ -49,3 +49,24 @@ local Button = Tab:CreateButton({
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/edgeiy/infiniteyield/master/source"))();
 	end,
 })
+
+local Button = Tab:CreateButton({
+        Name = "Anna bypasser", 
+        Callback = function() 
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/AnnaRoblox/AnnaBypasser/refs/heads/main/AnnaBypasser.lua"))();
+        end, 
+}) 
+
+local Button = Tab:CreateButton({
+	Name = "Cat Bypasser",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/edgeiy/infiniteyield/master/source"))();
+	end,
+})
+
+
+
+
+
+
+ 
