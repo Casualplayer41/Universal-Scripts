@@ -9,98 +9,54 @@ local ScreenGui = Instance.new("ScreenGui", localPlayer.PlayerGui)
 ScreenGui.Name = "FlingGui"
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 300, 0, 190)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -95)
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Selectable = true
 Frame.Visible = true
-
--- Dragging variables
-local dragging = false
-local dragInput, mousePos, framePos
-
--- Make frame draggable
-local function updateDrag(input)
-    local delta = input.Position - mousePos
-    Frame.Position = UDim2.new(
-        Frame.Position.X.Scale,
-        framePos.X + delta.X,
-        Frame.Position.Y.Scale,
-        framePos.Y + delta.Y
-    )
-end
-
-Frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        mousePos = input.Position
-        framePos = Frame.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-Frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        updateDrag(input)
-    end
-end)
 
 local TextBox = Instance.new("TextBox", Frame)
 TextBox.Size = UDim2.new(1, -20, 0, 30)
 TextBox.Position = UDim2.new(0, 10, 0, 10)
 TextBox.PlaceholderText = "Type player name..."
+TextBox.TextColor3 = Color3.new(1,1,1)
+TextBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TextBox.ClearTextOnFocus = false
+TextBox.Text = ""
 
 local SuggestionList = Instance.new("ScrollingFrame", Frame)
 SuggestionList.Size = UDim2.new(1, -20, 0, 60)
 SuggestionList.Position = UDim2.new(0, 10, 0, 45)
 SuggestionList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 SuggestionList.BorderSizePixel = 0
-SuggestionList.CanvasSize = UDim2.new(0, 0, 0, 0)
+SuggestionList.CanvasSize = UDim2.new(0, 0, 1, 0)
 SuggestionList.ScrollBarThickness = 4
 SuggestionList.Visible = false
+SuggestionList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
 local UIListLayout = Instance.new("UIListLayout", SuggestionList)
 UIListLayout.Padding = UDim.new(0, 4)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 local FlingButton = Instance.new("TextButton", Frame)
-FlingButton.Size = UDim2.new(0.48, -10, 0, 30)
+FlingButton.Size = UDim2.new(1, -20, 0, 30)
 FlingButton.Position = UDim2.new(0, 10, 1, -40)
-FlingButton.Text = "Fling!"
+FlingButton.Text = "Start Fling"
 FlingButton.BackgroundColor3 = Color3.fromRGB(70, 130, 230)
 FlingButton.TextColor3 = Color3.new(1,1,1)
 FlingButton.Font = Enum.Font.SourceSansBold
 FlingButton.TextSize = 22
 
 local StopButton = Instance.new("TextButton", Frame)
-StopButton.Size = UDim2.new(0.48, -10, 0, 30)
-StopButton.Position = UDim2.new(0.52, 0, 1, -40)
-StopButton.Text = "Stop"
-StopButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+StopButton.Size = UDim2.new(1, -20, 0, 30)
+StopButton.Position = UDim2.new(0, 10, 1, -80)
+StopButton.Text = "Stop Fling"
+StopButton.BackgroundColor3 = Color3.fromRGB(230, 70, 70)
 StopButton.TextColor3 = Color3.new(1,1,1)
 StopButton.Font = Enum.Font.SourceSansBold
 StopButton.TextSize = 22
-
-local NotificationLabel = Instance.new("TextLabel", Frame)
-NotificationLabel.Size = UDim2.new(1, -20, 0, 20)
-NotificationLabel.Position = UDim2.new(0, 10, 1, -65)
-NotificationLabel.BackgroundTransparency = 1
-NotificationLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-NotificationLabel.Font = Enum.Font.SourceSansItalic
-NotificationLabel.TextSize = 16
-NotificationLabel.Text = ""
-NotificationLabel.TextWrapped = true
 
 -- Helper function: Get players matching partial name
 local function getMatchingPlayers(partial)
@@ -158,7 +114,47 @@ end
 
 TextBox:GetPropertyChangedSignal("Text"):Connect(updateSuggestions)
 
--- Fling logic
+-- Dragging code for the Frame
+local dragging = false
+local dragInput, mousePos, framePos
+
+local function updateDrag(input)
+    local delta = input.Position - mousePos
+    Frame.Position = UDim2.new(
+        Frame.Position.X.Scale,
+        framePos.X + delta.X,
+        Frame.Position.Y.Scale,
+        framePos.Y + delta.Y
+    )
+end
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = Frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Fling code
 local flingConnection = nil
 local hiddenfling = false
 
@@ -174,25 +170,20 @@ local function startFling(targetPlayer)
     local targetHRP = getRoot(targetCharacter)
 
     if not (character and hrp and targetCharacter and targetHRP) then
-        NotificationLabel.Text = "Missing character parts."
+        warn("Missing character parts.")
         return
     end
 
     hiddenfling = true
-    NotificationLabel.Text = "Fling started on " .. targetPlayer.Name
 
     flingConnection = RunService.Heartbeat:Connect(function()
         if not hiddenfling then return end
-        if not hrp or not targetHRP then
-            NotificationLabel.Text = "Lost character parts."
-            stopFling()
-            return
-        end
+        if not hrp or not targetHRP then return end
 
-        -- Keep teleporting right above the target continuously
+        -- Teleport repeatedly
         hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
 
-        -- Velocity fling code
+        -- Apply fling velocity
         local originalVelocity = hrp.Velocity
         hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
 
@@ -216,41 +207,26 @@ local function stopFling()
         flingConnection:Disconnect()
         flingConnection = nil
     end
-    NotificationLabel.Text = "Fling stopped."
 end
 
--- Button click to start fling on typed player
+-- Buttons functionality
 FlingButton.MouseButton1Click:Connect(function()
     local name = TextBox.Text
     local targetPlayer = nil
-    
-    -- Try to find exact match first
+
     for _, plr in pairs(Players:GetPlayers()) do
         if plr.Name:lower() == name:lower() then
             targetPlayer = plr
             break
         end
     end
-    
-    -- If no exact match, try partial match (first found)
+
     if not targetPlayer then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Name:lower():find(name:lower()) then
-                targetPlayer = plr
-                break
-            end
-        end
+        warn("Player not found: " .. name)
+        return
     end
-    
-    if targetPlayer then
-        stopFling()  -- stop any existing fling before starting a new one
-        startFling(targetPlayer)
-    else
-        NotificationLabel.Text = "Player not found: " .. tostring(name)
-    end
+
+    startFling(targetPlayer)
 end)
 
--- Stop fling button
-StopButton.MouseButton1Click:Connect(function()
-    stopFling()
-end)
+StopButton.MouseButton1Click:Connect(stopFling)
