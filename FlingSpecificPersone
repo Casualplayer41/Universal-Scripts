@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local localPlayer = Players.LocalPlayer
 
@@ -13,6 +14,47 @@ Frame.Position = UDim2.new(0.5, -150, 0.5, -95)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
 Frame.Visible = true
+
+-- Dragging variables
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Make frame draggable
+local function updateDrag(input)
+    local delta = input.Position - mousePos
+    Frame.Position = UDim2.new(
+        Frame.Position.X.Scale,
+        framePos.X + delta.X,
+        Frame.Position.Y.Scale,
+        framePos.Y + delta.Y
+    )
+end
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = Frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
 
 local TextBox = Instance.new("TextBox", Frame)
 TextBox.Size = UDim2.new(1, -20, 0, 30)
@@ -136,17 +178,21 @@ local function startFling(targetPlayer)
         return
     end
 
-    -- Teleport to target
-    hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0) -- a bit above target
-
     hiddenfling = true
-
     NotificationLabel.Text = "Fling started on " .. targetPlayer.Name
 
     flingConnection = RunService.Heartbeat:Connect(function()
         if not hiddenfling then return end
-        if not hrp then return end
+        if not hrp or not targetHRP then
+            NotificationLabel.Text = "Lost character parts."
+            stopFling()
+            return
+        end
 
+        -- Keep teleporting right above the target continuously
+        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
+
+        -- Velocity fling code
         local originalVelocity = hrp.Velocity
         hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
 
