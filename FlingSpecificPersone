@@ -180,7 +180,7 @@ local function startFling(targetPlayer)
         if not hrp or not targetHRP then return end
 
         -- Teleport repeatedly
-        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
+        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 1, 0)
 
         -- Apply fling velocity
         local originalVelocity = hrp.Velocity
