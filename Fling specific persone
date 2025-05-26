@@ -1,85 +1,159 @@
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
--- GUI Setup
-local gui = Instance.new("ScreenGui", game.CoreGui)
-local frame = Instance.new("Frame", gui)
-local textbox = Instance.new("TextBox", frame)
-local button = Instance.new("TextButton", frame)
+local localPlayer = Players.LocalPlayer
+local mouse = localPlayer:GetMouse()
 
-gui.Name = "HardFlingGUI"
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.Active = true
-frame.Draggable = true
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui", localPlayer.PlayerGui)
+ScreenGui.Name = "FlingGui"
 
-textbox.Size = UDim2.new(1, -20, 0, 30)
-textbox.Position = UDim2.new(0, 10, 0, 10)
-textbox.PlaceholderText = "Enter Username"
-textbox.Text = ""
-textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-textbox.TextColor3 = Color3.fromRGB(0, 0, 0)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Visible = true
 
-button.Size = UDim2.new(1, -20, 0, 30)
-button.Position = UDim2.new(0, 10, 0, 50)
-button.Text = "Hard Fling"
-button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Size = UDim2.new(1, -20, 0, 30)
+TextBox.Position = UDim2.new(0, 10, 0, 10)
+TextBox.PlaceholderText = "Type player name..."
 
--- Main fling logic
-local function hardFling(targetPlayer)
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local targetChar = targetPlayer.Character
-    local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+local SuggestionList = Instance.new("ScrollingFrame", Frame)
+SuggestionList.Size = UDim2.new(1, -20, 0, 60)
+SuggestionList.Position = UDim2.new(0, 10, 0, 45)
+SuggestionList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SuggestionList.BorderSizePixel = 0
+SuggestionList.CanvasSize = UDim2.new(0, 0, 1, 0)
+SuggestionList.ScrollBarThickness = 4
+SuggestionList.Visible = false
 
-    if not hrp or not targetHRP then return end
+local UIListLayout = Instance.new("UIListLayout", SuggestionList)
+UIListLayout.Padding = UDim.new(0, 4)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    -- Remove any existing BodyMovers
-    for _, obj in ipairs(hrp:GetChildren()) do
-        if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") then
-            obj:Destroy()
+local FlingButton = Instance.new("TextButton", Frame)
+FlingButton.Size = UDim2.new(1, -20, 0, 30)
+FlingButton.Position = UDim2.new(0, 10, 1, -40)
+FlingButton.Text = "Fling!"
+FlingButton.BackgroundColor3 = Color3.fromRGB(70, 130, 230)
+FlingButton.TextColor3 = Color3.new(1,1,1)
+FlingButton.Font = Enum.Font.SourceSansBold
+FlingButton.TextSize = 22
+
+-- Helper function: Get players matching partial name
+local function getMatchingPlayers(partial)
+    partial = partial:lower()
+    local matches = {}
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Name:lower():find(partial) then
+            table.insert(matches, plr)
+        end
+    end
+    return matches
+end
+
+-- Update suggestions based on TextBox input
+local function updateSuggestions()
+    local input = TextBox.Text
+    -- Clear old suggestions
+    for _, child in pairs(SuggestionList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
         end
     end
 
-    -- Add velocity components
-    local bv = Instance.new("BodyVelocity")
-    bv.Velocity = Vector3.new(9999, 9999, 9999)
-    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-    bv.P = 1e9
-    bv.Parent = hrp
+    if input == "" then
+        SuggestionList.Visible = false
+        return
+    end
 
-    local bav = Instance.new("BodyAngularVelocity")
-    bav.AngularVelocity = Vector3.new(0, 500, 0)
-    bav.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-    bav.P = 1e9
-    bav.Parent = hrp
+    local matches = getMatchingPlayers(input)
+    if #matches == 0 then
+        SuggestionList.Visible = false
+        return
+    end
 
-    -- Weld to target
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = hrp
-    weld.Part1 = targetHRP
-    weld.Parent = hrp
+    SuggestionList.Visible = true
+    SuggestionList.CanvasSize = UDim2.new(0, 0, 0, (#matches * 30 + (#matches-1)*4))
 
-    -- Wait and cleanup
-    task.wait(10)
-    bv:Destroy()
-    bav:Destroy()
-    weld:Destroy()
+    for i, plr in pairs(matches) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 30)
+        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        btn.TextColor3 = Color3.new(1, 1, 1)
+        btn.Font = Enum.Font.SourceSans
+        btn.TextSize = 20
+        btn.Text = plr.Name
+        btn.LayoutOrder = i
+        btn.Parent = SuggestionList
+
+        btn.MouseButton1Click:Connect(function()
+            TextBox.Text = plr.Name
+            SuggestionList.Visible = false
+        end)
+    end
 end
 
--- Button event
-button.MouseButton1Click:Connect(function()
-    local name = textbox.Text
-    local target = Players:FindFirstChild(name)
-    if target then
-        button.Text = "Flinging..."
-        hardFling(target)
-        button.Text = "Hard Fling"
-    else
-        button.Text = "Player Not Found!"
-        task.wait(2)
-        button.Text = "Hard Fling"
+TextBox:GetPropertyChangedSignal("Text"):Connect(updateSuggestions)
+
+-- Fling function (based on walkfling you showed)
+local flingConnection = nil
+local hiddenfling = false
+
+local function getRoot(character)
+    return character and (character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso"))
+end
+
+local function startFling(targetPlayer)
+    if not targetPlayer then return end
+    local character = localPlayer.Character
+    local hrp = getRoot(character)
+    local targetCharacter = targetPlayer.Character
+    local targetHRP = getRoot(targetCharacter)
+
+    if not (character and hrp and targetCharacter and targetHRP) then
+        warn("Missing character parts.")
+        return
     end
-end)
+
+    -- Teleport to target
+    hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0) -- a bit above target
+
+    hiddenfling = true
+
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not hiddenfling then return end
+        if not hrp then return end
+
+        local originalVelocity = hrp.Velocity
+        hrp.Velocity = originalVelocity * 10000 + Vector3.new(0, 10000, 0)
+
+        RunService.RenderStepped:Wait()
+
+        if hrp then
+            hrp.Velocity = originalVelocity
+        end
+
+        RunService.Stepped:Wait()
+
+        if hrp then
+            hrp.Velocity = originalVelocity + Vector3.new(0, 0.1, 0)
+        end
+    end)
+end
+
+local function stopFling()
+    hiddenfling = false
+    if flingConnection then
+        flingConnection:Disconnect()
+        flingConnection = nil
+    end
+end
+
+-- Button click to start fling on typed player
+FlingButton.MouseButton1Click:Connect(function()
+    local name = TextBox.Text
+    local targetPlayer = Players:FindFirstChild(name)
+    if not targetPlayer then
